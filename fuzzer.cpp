@@ -43,6 +43,7 @@ void Fuzzer::ParseOptions(int argc, char **argv) {
   acceptable_crash_ratio = 0.02;
 
   num_threads = 1;
+  attach_mode = false;
 
   char *option;
 
@@ -122,6 +123,14 @@ void Fuzzer::ParseOptions(int argc, char **argv) {
   add_all_inputs = GetBinaryOption("-add_all_inputs", argc, argv, false);
   
   dump_coverage = GetBinaryOption("-dump_coverage", argc, argv, false);
+
+  pid = GetBinaryOption("-pid", argc, argv);
+  if(pid)
+  {
+    attach_mode = true;
+    num_threads = 1;
+    crash_reproduce_retries = 0;
+  }
 }
 
 void Fuzzer::SetupDirectories() {
@@ -255,7 +264,13 @@ RunResult Fuzzer::RunSampleAndGetCoverage(ThreadContext *tc, Sample *sample, Cov
     }
   }
 
-  RunResult result = tc->instrumentation->Run(tc->target_argc, tc->target_argv, init_timeout, timeout);
+  RunResult result;
+  if(attach_mode)
+  {
+    result = tc->instrumentation->Attach(pid, init_timeout, timeout);
+  }else{
+    result = tc->instrumentation->Run(tc->target_argc, tc->target_argv, init_timeout, timeout);
+  }
   tc->instrumentation->GetCoverage(*coverage, true);
 
   // save crashes and hangs immediately when they are detected
@@ -419,7 +434,7 @@ RunResult Fuzzer::RunSample(ThreadContext *tc, Sample *sample, int *has_new_cove
     if(new_thread_coverage.empty()) return result;
   }
   
-  // printf("found new coverage: \n");
+  printf("found new coverage: \n");
   // PrintCoverage(initialCoverage);
 
   // the sample returned new coverage

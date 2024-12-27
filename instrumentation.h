@@ -32,6 +32,12 @@ public:
     return Run(argc, argv, init_timeout, timeout);
   }
 
+  virtual RunResult Attach(unsigned int pid, char * process_name, uint32_t init_timeout, uint32_t timeout) = 0;
+  
+  virtual RunResult AttachWithCrashAnalysis(unsigned int pid, uint32_t init_timeout, uint32_t timeout) {
+    return Attach(pid, init_timeout, timeout);
+  }
+
   virtual void CleanTarget() = 0;
 
   virtual bool HasNewCoverage() = 0;

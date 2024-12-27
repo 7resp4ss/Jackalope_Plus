@@ -254,6 +254,10 @@ protected:
   bool add_all_inputs;
   
   bool dump_coverage;
+
+  unsigned int pid;
+
+  bool attach_mode;
   
   Mutex crash_mutex;
   std::unordered_map<std::string, int> unique_crashes;

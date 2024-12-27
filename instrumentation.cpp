@@ -45,3 +45,12 @@ std::string Instrumentation::AnonymizeAddress(void* addr) {
   return std::string(buf);
 }
 
+std::string Instrumentation::ProcessAddress(void* addr) {
+    char buf[20];
+    sprintf(buf, "%p", addr);
+
+    if (!strcmp(buf, "(nil)")) return std::string("0");
+    
+    return std::string(buf);
+}
+
