@@ -27,6 +27,5 @@ add_executable(test_server
 target_link_libraries(test_client ws2_32)
 target_link_libraries(test_server ws2_32)
 
-endif()
 
 

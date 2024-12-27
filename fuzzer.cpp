@@ -124,7 +124,7 @@ void Fuzzer::ParseOptions(int argc, char **argv) {
   
   dump_coverage = GetBinaryOption("-dump_coverage", argc, argv, false);
 
-  pid = GetBinaryOption("-pid", argc, argv);
+  pid = GetBinaryOption("-pid", argc, argv, 0xdead);
   if(pid)
   {
     attach_mode = true;

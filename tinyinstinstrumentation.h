@@ -33,6 +33,9 @@ public:
   RunResult Run(int argc, char** argv, uint32_t init_timeout, uint32_t timeout) override;
   RunResult RunWithCrashAnalysis(int argc, char** argv, uint32_t init_timeout, uint32_t timeout) override;
 
+  RunResult Attach(unsigned int pid,  uint32_t init_timeout, uint32_t timeout) override;
+  RunResult AttachWithCrashAnalysis(unsigned int pid, uint32_t init_timeout, uint32_t timeout) override;
+
   void CleanTarget() override;
 
   bool HasNewCoverage() override;
