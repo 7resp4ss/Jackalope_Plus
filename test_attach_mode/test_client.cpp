@@ -1,79 +1,108 @@
-#include <iostream>
-#include <fstream>
 #include <winsock2.h>
-#include <string>
-#include <cstring>
-#include <stdexcept>
+#include <ws2tcpip.h>
+#include <stdio.h>
+#include <stdlib.h>
 
-#pragma comment(lib, "ws2_32.lib")  // Linking to the Windows socket library
-
-void send_file_data(const std::string& file_path, const std::string& server_ip, int server_port) {
-    // Initialize Winsock
-    WSADATA wsaData;
-    if (WSAStartup(MAKEWORD(2, 2), &wsaData) != 0) {
-        std::cerr << "WSAStartup failed!" << std::endl;
-        return;
-    }
-
-    // Create a socket
-    SOCKET sock = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
-    if (sock == INVALID_SOCKET) {
-        std::cerr << "Socket creation failed!" << std::endl;
-        WSACleanup();
-        return;
-    }
-
-    // Define server address
-    sockaddr_in server_addr;
-    server_addr.sin_family = AF_INET;
-    server_addr.sin_port = htons(server_port);
-    server_addr.sin_addr.s_addr = inet_addr(server_ip.c_str());
-
-    // Connect to server
-    if (connect(sock, (struct sockaddr*)&server_addr, sizeof(server_addr)) == SOCKET_ERROR) {
-        std::cerr << "Connection failed!" << std::endl;
-        closesocket(sock);
-        WSACleanup();
-        return;
-    }
-
-    // Read file contents
-    std::ifstream file(file_path, std::ios::in | std::ios::binary);
-    if (!file.is_open()) {
-        std::cerr << "Failed to open file: " << file_path << std::endl;
-        closesocket(sock);
-        WSACleanup();
-        return;
-    }
-
-    // Read file into buffer
-    std::string file_data((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
-
-    // Send the file content to the server
-    int bytes_sent = send(sock, file_data.c_str(), file_data.size(), 0);
-    if (bytes_sent == SOCKET_ERROR) {
-        std::cerr << "Failed to send data to the server!" << std::endl;
-    } else {
-        std::cout << "Sent " << bytes_sent << " bytes to the server." << std::endl;
-    }
-
-    // Close the socket and clean up Winsock
-    closesocket(sock);
-    WSACleanup();
-}
+// Link with the Ws2_32.lib library
+#pragma comment(lib, "Ws2_32.lib")
 
 int main(int argc, char* argv[]) {
-    if (argc != 4) {
-        std::cerr << "Usage: " << argv[0] << " <file_path> <server_ip> <server_port>" << std::endl;
+    // Check if file path is provided
+    if (argc < 2) {
+        printf("Usage: %s <file_path>\n", argv[0]);
         return 1;
     }
 
-    std::string file_path = argv[1];
-    std::string server_ip = argv[2];
-    int server_port = std::stoi(argv[3]);
+    const char* filePath = argv[1];
+    FILE* file = fopen(filePath, "r");
+    if (file == NULL) {
+        printf("Failed to open file: %s\n", filePath);
+        return 1;
+    }
 
-    // Send file data to the server
-    send_file_data(file_path, server_ip, server_port);
+    // Determine file size
+    fseek(file, 0, SEEK_END);
+    long fileSize = ftell(file);
+    if (fileSize < 0) {
+        printf("Failed to determine file size.\n");
+        fclose(file);
+        return 1;
+    }
+    fseek(file, 0, SEEK_SET);
+
+    // Allocate buffer and read file content
+    char* buffer = (char*)malloc(fileSize);
+    if (buffer == NULL) {
+        printf("Memory allocation failed.\n");
+        fclose(file);
+        return 1;
+    }
+
+    size_t bytesRead = fread(buffer, 1, fileSize, file);
+    if (bytesRead != fileSize) {
+        printf("Failed to read the complete file.\n");
+        free(buffer);
+        fclose(file);
+        return 1;
+    }
+    fclose(file);
+    printf("Haved been read %s",buffer);
+
+    // Initialize Winsock
+    WSADATA wsaData;
+    int wsaInit = WSAStartup(MAKEWORD(2, 2), &wsaData);
+    if (wsaInit != 0) {
+        printf("WSAStartup failed with error: %d\n", wsaInit);
+        free(buffer);
+        return 1;
+    }
+
+    // Create a socket
+    SOCKET clientSocket = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
+    if (clientSocket == INVALID_SOCKET) {
+        printf("Socket creation failed with error: %ld\n", WSAGetLastError());
+        WSACleanup();
+        free(buffer);
+        return 1;
+    }
+
+    // Setup server address structure
+    struct sockaddr_in serverAddr;
+    serverAddr.sin_family = AF_INET;
+    serverAddr.sin_port = htons(8888); // Server port
+    serverAddr.sin_addr.s_addr = inet_addr("127.0.0.1"); // Server IP address
+
+    // Connect to the server
+    int connectResult = connect(clientSocket, (struct sockaddr*)&serverAddr, sizeof(serverAddr));
+    if (connectResult == SOCKET_ERROR) {
+        printf("Connection to server failed with error: %ld\n", WSAGetLastError());
+        closesocket(clientSocket);
+        WSACleanup();
+        free(buffer);
+        return 1;
+    }
+
+    // Send the data
+    int totalBytesSent = 0;
+    while (totalBytesSent < fileSize) {
+        int bytesToSend = (fileSize - totalBytesSent) > 1024 ? 1024 : (fileSize - totalBytesSent);
+        int sendResult = send(clientSocket, buffer + totalBytesSent, bytesToSend, 0);
+        if (sendResult == SOCKET_ERROR) {
+            printf("Failed to send data with error: %ld\n", WSAGetLastError());
+            closesocket(clientSocket);
+            WSACleanup();
+            free(buffer);
+            return 1;
+        }
+        totalBytesSent += sendResult;
+    }
+
+    printf("File sent successfully, total bytes sent: %d\n", totalBytesSent);
+
+    // Clean up
+    closesocket(clientSocket);
+    WSACleanup();
+    free(buffer);
 
     return 0;
 }
