@@ -43,6 +43,7 @@ void Fuzzer::ParseOptions(int argc, char **argv) {
   acceptable_crash_ratio = 0.02;
 
   num_threads = 1;
+  attach_mode = false;
 
   char *option;
 
@@ -122,6 +123,17 @@ void Fuzzer::ParseOptions(int argc, char **argv) {
   add_all_inputs = GetBinaryOption("-add_all_inputs", argc, argv, false);
   
   dump_coverage = GetBinaryOption("-dump_coverage", argc, argv, false);
+
+  pid = (unsigned int)GetIntOption("-pid", argc, argv, 0x0);
+  //attach_client = GetBinaryOption("-attach_client", argc, argv, false);
+
+  if(pid)
+  {
+    attach_mode = true;
+    num_threads = 1;
+    crash_reproduce_retries = 0;
+  }
+
 }
 
 void Fuzzer::SetupDirectories() {
@@ -188,9 +200,13 @@ void Fuzzer::Run(int argc, char **argv) {
   }
   
   last_save_time = GetCurTime();
-  
+  // if(attach_mode){
+  //   ThreadContext *tc = CreateThreadContext(argc, argv, 0xdead, !attach_mode);  //client id is 0xdead
+  //   CreateThread(StartFuzzThread, tc);
+  //   num_threads = num_threads--;
+  // }
   for (int i = 1; i <= num_threads; i++) {
-    ThreadContext *tc = CreateThreadContext(argc, argv, i);
+    ThreadContext *tc = CreateThreadContext(argc, argv, i, attach_mode);
     CreateThread(StartFuzzThread, tc);
   }
 
@@ -255,7 +271,13 @@ RunResult Fuzzer::RunSampleAndGetCoverage(ThreadContext *tc, Sample *sample, Cov
     }
   }
 
-  RunResult result = tc->instrumentation->Run(tc->target_argc, tc->target_argv, init_timeout, timeout);
+  RunResult result;
+  if(tc->attach_mode)
+  {
+    result = tc->instrumentation->Attach(pid, init_timeout, timeout);
+  }else{
+    result = tc->instrumentation->Run(tc->target_argc, tc->target_argv, init_timeout, timeout);
+  }
   tc->instrumentation->GetCoverage(*coverage, true);
 
   // save crashes and hangs immediately when they are detected
@@ -335,8 +357,14 @@ RunResult Fuzzer::TryReproduceCrash(ThreadContext* tc, Sample* sample, uint32_t 
         return HANG;
       }
     }
+    if(tc->attach_mode)
+    {
+      result = tc->instrumentation->AttachWithCrashAnalysis(pid, init_timeout, timeout);
 
-    result = tc->instrumentation->RunWithCrashAnalysis(tc->target_argc, tc->target_argv, init_timeout, timeout);
+    }else
+    {
+      result = tc->instrumentation->RunWithCrashAnalysis(tc->target_argc, tc->target_argv, init_timeout, timeout);
+    }
     tc->instrumentation->ClearCoverage();
 
     if (result == CRASH) return result;
@@ -924,7 +952,7 @@ void Fuzzer::AdjustSamplePriority(ThreadContext *tc, SampleQueueEntry *entry, in
   else entry->priority--;
 }
 
-Fuzzer::ThreadContext *Fuzzer::CreateThreadContext(int argc, char **argv, int thread_id) {
+Fuzzer::ThreadContext *Fuzzer::CreateThreadContext(int argc, char **argv, int thread_id, bool attach_mode) {
   ThreadContext *tc = new ThreadContext();
 
   // copy arguments for each thread
@@ -944,6 +972,7 @@ Fuzzer::ThreadContext *Fuzzer::CreateThreadContext(int argc, char **argv, int th
   tc->minimizer = CreateMinimizer(argc, argv, tc);
   tc->range_tracker = CreateRangeTracker(argc, argv, tc);
   tc->coverage_initialized = false;
+  tc->attach_mode = attach_mode;
   
   return tc;
 }
@@ -1023,7 +1052,20 @@ SampleDelivery *Fuzzer::CreateSampleDelivery(int argc, char **argv, ThreadContex
     SHMSampleDelivery* sampleDelivery = new SHMSampleDelivery((char*)shm_name.c_str(), Sample::max_size + 4);
     sampleDelivery->Init(argc, argv);
     return sampleDelivery;
-  } else {
+  } else if(!strcmp(option, "external")) {
+    string extension = "";
+    char *extension_opt = GetOption("-file_extension", argc, argv);
+    if(extension_opt) {
+      extension = string(".") + string(extension_opt);
+    }
+
+    string outfile = DirJoin(delivery_dir, string("input_") + std::to_string(tc->thread_id) + extension);
+    ReplaceTargetCmdArg(tc, "@@", outfile.c_str());
+
+    ExternalSampleDelivery* sampleDelivery = new ExternalSampleDelivery(ArgvToCmd(tc->target_argc, tc->target_argv));
+    sampleDelivery->SetFilename(outfile);
+    return sampleDelivery;
+  } else{
     FATAL("Unknown sample delivery option");
   }
 }

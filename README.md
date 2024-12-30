@@ -92,7 +92,7 @@ The following command line arguments are supported:
 
 `-nthreads` - Number of fuzzer threads. Default is 1.
 
-`-delivery <file|shmem>` - Sample delivery mechanism to use. If `file`, each sample is output as file and "@@" in the target arguments is replaced with a path to the file. If `shmem`, the fuzzer creates shared memory instead and replaces "@@" in the target arguments with the name of the shared memory. It is the target's responsibility to open the shared memory and extract the sample in this case. Default is `file`.
+`-delivery <file|shmem|external>` - Sample delivery mechanism to use. If `file`, each sample is output as file and "@@" in the target arguments is replaced with a path to the file. If `shmem`, the fuzzer creates shared memory instead and replaces "@@" in the target arguments with the name of the shared memory. It is the target's responsibility to open the shared memory and extract the sample in this case. If `external` each sample will run sender command to attach target process. Default is `file`.
 
 `-file_extension` - When using `file` sample delivery, appends the specified extension to the filename. Useful if the target expects input files to have a certain extension. 
 
@@ -129,6 +129,8 @@ The following command line arguments are supported:
 `-dict <path>` - Provides a dictionary to be used during mutation. The dictionary should be a text file with every entry on a separate line. `\xXX` escape sequences can be used.
 
 `-dump_coverage` - Periodically export coverage (as `coverage.txt` in the output directory) in a format suitable for importing into [Lighthouse](https://github.com/gaasedelen/lighthouse)
+
+`-pid` – Specifies the `PID` of the target process you want to fuzz.
 
 For TinyInst instrumentation command line arguments, refer to [TinyInst readme](https://github.com/googleprojectzero/TinyInst).
 
