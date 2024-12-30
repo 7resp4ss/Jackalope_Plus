@@ -202,7 +202,7 @@ RunResult TinyInstInstrumentation::Attach(unsigned int pid, uint32_t init_timeou
     if (instrumentation->IsTargetFunctionDefined()) {
       ret = OK;
       cur_iteration++;
-      printf("TargetFunction finish...\n");
+      //printf("TargetFunction finish...\n");
     } else {
       FATAL("Unexpected status received from the debugger\n");
     }

@@ -41,7 +41,7 @@ int main(int argc, char* argv[]) {
     size_t bytesRead = fread(buffer, 1, fileSize, file);
 
     fclose(file);
-    printf("Reading %s\n",buffer);
+    // printf("Reading %s\n",buffer);
 
     // Initialize Winsock
     WSADATA wsaData;
