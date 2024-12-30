@@ -38,3 +38,17 @@ int SHMSampleDelivery::DeliverSample(Sample *sample) {
   return 1;
 }
 
+ExternalSampleDelivery::ExternalSampleDelivery(char *cmd) {
+    this->cmd = cmd;
+}
+
+ExternalSampleDelivery::~ExternalSampleDelivery() {
+  this->cmd = "";
+}
+
+int ExternalSampleDelivery::DeliverSample(Sample *sample) {
+  sample->Save(filename.c_str());
+  HANDLE thread_handle = CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)system, cmd, 0, NULL);
+  CloseHandle(thread_handle);
+  return 1;
+}

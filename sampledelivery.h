@@ -59,3 +59,21 @@ protected:
   unsigned char *shm;
 };
 
+class ExternalSampleDelivery : public SampleDelivery {
+public:
+  ExternalSampleDelivery(char *cmd);
+  ~ExternalSampleDelivery();
+
+  int DeliverSample(Sample *sample);
+  
+  void SetFilename(std::string filename) {
+    this->filename = filename;
+  }
+  
+protected:
+
+  std::string filename;
+  char *cmd;
+};
+
+

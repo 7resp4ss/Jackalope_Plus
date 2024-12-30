@@ -81,6 +81,7 @@ public:
     std::vector<Sample *> all_samples_local;
     
     bool coverage_initialized;
+    bool attach_mode;
 
     ~ThreadContext();
   };
@@ -156,7 +157,7 @@ protected:
 
   void SetupDirectories();
 
-  ThreadContext *CreateThreadContext(int argc, char **argv, int thread_id);
+  ThreadContext *CreateThreadContext(int argc, char **argv, int thread_id, bool attach_mode);
   
   virtual Mutator *CreateMutator(int argc, char **argv, ThreadContext *tc) = 0;
   virtual PRNG *CreatePRNG(int argc, char **argv, ThreadContext *tc);

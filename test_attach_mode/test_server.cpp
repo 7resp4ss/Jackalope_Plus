@@ -5,6 +5,7 @@
 #include <cstdlib>
 #include <stdexcept>
 #include <algorithm>  // For std::min
+#include <windows.h>  // For GetCurrentProcessId
 
 void process_data(const char* data, int read_size) {
     // Branch 1: Data starts with "s"
@@ -109,6 +110,11 @@ void handle_client(SOCKET client_socket) {
     closesocket(client_socket);  // Use closesocket
 }
 
+void print_pid() {
+    DWORD pid = GetCurrentProcessId();  // Get the current process ID
+    printf("Process ID: %lu\n", pid);  // Print the PID
+}
+
 int main() {
     WSADATA wsaData;
     SOCKET server_socket, client_socket;
@@ -151,7 +157,7 @@ int main() {
     }
 
     std::cout << "Server listening on port 8080..." << std::endl;
-
+    print_pid();
     // Accept incoming client connections
     client_socket = accept(server_socket, (struct sockaddr*)&client_addr, &client_len);
     if (client_socket == INVALID_SOCKET) {

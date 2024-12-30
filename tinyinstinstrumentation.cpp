@@ -212,7 +212,7 @@ RunResult TinyInstInstrumentation::Attach(unsigned int pid, uint32_t init_timeou
 }
 
 RunResult TinyInstInstrumentation::AttachWithCrashAnalysis(unsigned int pid, uint32_t init_timeout, uint32_t timeout) {
-  // clean process when reproducing crashes
+  //Do not clean process when reproducing crashes
   instrumentation->Kill();
   // disable instrumentation when reproducing crashes
   instrumentation->DisableInstrumentation();
