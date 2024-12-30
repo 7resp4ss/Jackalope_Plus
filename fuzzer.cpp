@@ -132,7 +132,6 @@ void Fuzzer::ParseOptions(int argc, char **argv) {
     attach_mode = true;
     num_threads = 1;
     crash_reproduce_retries = 0;
-    printf("Attach mode open, will be attach %u \n",pid);
   }else{
     PrintUsage();
   }
@@ -281,7 +280,6 @@ RunResult Fuzzer::RunSampleAndGetCoverage(ThreadContext *tc, Sample *sample, Cov
   }else{
     result = tc->instrumentation->Run(tc->target_argc, tc->target_argv, init_timeout, timeout);
   }
-  printf("FuzzOne down");
   tc->instrumentation->GetCoverage(*coverage, true);
 
   // save crashes and hangs immediately when they are detected
@@ -451,8 +449,8 @@ RunResult Fuzzer::RunSample(ThreadContext *tc, Sample *sample, int *has_new_cove
     if(new_thread_coverage.empty()) return result;
   }
   
-  printf("found new coverage: \n");
-  // PrintCoverage(initialCoverage);
+  //printf("found new coverage: \n");
+  //PrintCoverage(initialCoverage);
 
   // the sample returned new coverage
 

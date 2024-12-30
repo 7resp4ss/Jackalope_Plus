@@ -131,7 +131,7 @@ RunResult TinyInstInstrumentation::Attach(unsigned int pid, uint32_t init_timeou
 
   if (instrumentation->IsTargetFunctionDefined()) {
     if (cur_iteration == num_iterations) {
-      instrumentation->Kill();
+      //instrumentation->Kill();
       cur_iteration = 0;
     }
   }
@@ -144,11 +144,13 @@ RunResult TinyInstInstrumentation::Attach(unsigned int pid, uint32_t init_timeou
   if (instrumentation->IsTargetFunctionDefined()) {
     timeout1 = init_timeout;
   }
-  if (instrumentation->IsTargetAlive() && persist) {
+  //  if (instrumentation->IsTargetAlive() && persist) 
+  if (instrumentation->IsTargetAlive()) {
     status = instrumentation->Continue(timeout1);
   } else {
-    instrumentation->Kill();
+    //instrumentation->Kill();
     cur_iteration = 0;
+    printf("IsTargetNotAlive, Attach mode open, will be attach %u \n",pid);
     status = instrumentation->Attach(pid, timeout1);
   }
   // if target function is defined,
@@ -156,10 +158,10 @@ RunResult TinyInstInstrumentation::Attach(unsigned int pid, uint32_t init_timeou
   if (instrumentation->IsTargetFunctionDefined()) {
     if (status != DEBUGGER_TARGET_START) {
       // try again with a clean process
-      WARN("Target function not reached, retrying with a clean process\n");
-      instrumentation->Kill();
+      WARN("DEBUGGER_TARGET_NOT_START, Target function not reached, retrying with a clean process\n");
+      //instrumentation->Kill();
       cur_iteration = 0;
-      status = instrumentation->Attach(pid, timeout1);
+      status = instrumentation->Continue(timeout1);
     }
     if (status != DEBUGGER_TARGET_START) {
       switch (status) {
@@ -187,7 +189,7 @@ RunResult TinyInstInstrumentation::Attach(unsigned int pid, uint32_t init_timeou
     break;
   case DEBUGGER_HANGED:
     ret = HANG;
-    instrumentation->Kill();
+    //instrumentation->Kill();
     break;
   case DEBUGGER_PROCESS_EXIT:
     ret = OK;
@@ -200,6 +202,7 @@ RunResult TinyInstInstrumentation::Attach(unsigned int pid, uint32_t init_timeou
     if (instrumentation->IsTargetFunctionDefined()) {
       ret = OK;
       cur_iteration++;
+      printf("TargetFunction finish...\n");
     } else {
       FATAL("Unexpected status received from the debugger\n");
     }
@@ -208,16 +211,17 @@ RunResult TinyInstInstrumentation::Attach(unsigned int pid, uint32_t init_timeou
     FATAL("Unexpected status received from the debugger\n");
     break;
   }
+
   return ret;
 }
 
 RunResult TinyInstInstrumentation::AttachWithCrashAnalysis(unsigned int pid, uint32_t init_timeout, uint32_t timeout) {
   //Do not clean process when reproducing crashes
-  instrumentation->Kill();
+  //instrumentation->Kill();
   // disable instrumentation when reproducing crashes
   instrumentation->DisableInstrumentation();
   RunResult ret = Attach(pid, init_timeout, timeout);
-  instrumentation->Kill();
+  //instrumentation->Kill();
   instrumentation->EnableInstrumentation();
   return ret;
 }

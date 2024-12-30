@@ -39,14 +39,9 @@ int main(int argc, char* argv[]) {
     }
 
     size_t bytesRead = fread(buffer, 1, fileSize, file);
-    if (bytesRead != fileSize) {
-        printf("Failed to read the complete file.\n");
-        free(buffer);
-        fclose(file);
-        return 1;
-    }
+
     fclose(file);
-    printf("Haved been read %s",buffer);
+    printf("Reading %s\n",buffer);
 
     // Initialize Winsock
     WSADATA wsaData;
