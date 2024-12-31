@@ -14,32 +14,31 @@ jobs:
     runs-on: windows-latest
 
     steps:
-      - uses: actions/checkout@v4
+    - uses: actions/checkout@v4
 
-      - name: Setup CMake
-        uses: jwlawson/actions-setup-cmake@v1
-        with:
-          cmake-version: '3.25.0'
+    - name: Setup CMake
+      uses: jwlawson/actions-setup-cmake@v1
+      with:
+        cmake-version: '3.25.0'
 
-      - name: Set up Visual Studio environment
-        shell: cmd
-        run: |
-          "C:\Program Files\Microsoft Visual Studio\2022\Enterprise\VC\Auxiliary\Build\vcvarsall.bat" x64
+    - name: Set up Visual Studio environment
+      shell: cmd
+      run: "C:\\Program Files\\Microsoft Visual Studio\\2022\\Enterprise\\VC\\Auxiliary\\Build\\vcvarsall.bat" x64
 
-      - name: List Windows SDK versions
-        run: |
-          dir "C:\Program Files (x86)\Windows Kits\10\Include\"
-          dir "C:\Program Files (x86)\Windows Kits\10\Include\10.0.*\ucrt"
+    - name: List Windows SDK versions
+      run: |
+        dir "C:\Program Files (x86)\Windows Kits\10\Include\"
+        dir "C:\Program Files (x86)\Windows Kits\10\Include\10.0.*\ucrt"
 
-      - name: Configure and Build
-        run: |
-          git clone --recurse-submodules https://github.com/googleprojectzero/TinyInst.git
-          mkdir build
-          cd build
-          cmake -G "Visual Studio 17 2022" -A x64 .. -DCMAKE_SYSTEM_VERSION=latest
-          cmake --build . --config %BUILD_TYPE%
+    - name: Configure and Build
+      run: |
+        git clone --recurse-submodules https://github.com/googleprojectzero/TinyInst.git
+        mkdir build
+        cd build
+        cmake -G "Visual Studio 17 2022" -A x64 .. -DCMAKE_SYSTEM_VERSION=latest
+        cmake --build . --config ${{ env.BUILD_TYPE }}
 
-      - name: Test
-        working-directory: build
-        run: |
-          ctest -C %BUILD_TYPE%
+    - name: Test
+      working-directory: build
+      run: |
+        ctest -C ${{ env.BUILD_TYPE }}
