@@ -139,4 +139,3 @@ if(LINUX)
 endif()
 
 add_subdirectory(examples)
-add_subdirectory(test_attach_mode)

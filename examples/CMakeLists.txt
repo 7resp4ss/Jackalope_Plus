@@ -21,3 +21,6 @@ if (APPLE)
 endif()
 
 
+if (WIN32)
+  add_subdirectory(Attach_mode)
+endif()
