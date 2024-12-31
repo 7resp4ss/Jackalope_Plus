@@ -80,6 +80,12 @@ Usage:
 
 `./fuzzer <fuzzer arguments> <instrumentation and other components arguments> -- <target command line>`
 
+`<target command line>`  : 
+
++ @@ : If delivery is file, @@ will be replaced by the sample file name. If delivery is shmem, @@ will be replaced by the shared memory name.
++ ?? : If `-out_extension` have been set, This placeholder is designed to represent the target process output file.
+
+
 The following command line arguments are supported:
 
 `-in` - Input directory (directory containing initial sample set). If input directory is "-", the fuzzer attempts to restore the previous session (same as using the `-restore` flag).
@@ -130,7 +136,7 @@ The following command line arguments are supported:
 
 `-dump_coverage` - Periodically export coverage (as `coverage.txt` in the output directory) in a format suitable for importing into [Lighthouse](https://github.com/gaasedelen/lighthouse)
 
-`-pid` – Specifies the `PID` of the target process you want to fuzz.
+`-pid`  –  Specifies the `PID` of the target process you want to fuzz.
 
 For TinyInst instrumentation command line arguments, refer to [TinyInst readme](https://github.com/googleprojectzero/TinyInst).
 

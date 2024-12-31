@@ -546,7 +546,6 @@ void Fuzzer::MinimizeSample(ThreadContext *tc, Sample *sample, Coverage* stable_
   delete context;
 }
 
-
 int Fuzzer::InterestingSample(ThreadContext *tc, Sample *sample, Coverage *stableCoverage, Coverage *variableCoverage) {
   coverage_mutex.Lock();
 
@@ -1024,6 +1023,14 @@ Instrumentation *Fuzzer::CreateInstrumentation(int argc, char **argv, ThreadCont
 
 SampleDelivery *Fuzzer::CreateSampleDelivery(int argc, char **argv, ThreadContext *tc) {
   char *option = GetOption("-delivery", argc, argv);
+  char *out_extension = GetOption("-out_extension", argc, argv);
+
+  if(out_extension){
+    string out_dir = DirJoin(delivery_dir, "out");
+    string target_out = DirJoin(out_dir, string("out_") + std::to_string(tc->thread_id) + out_extension);
+    ReplaceTargetCmdArg(tc, "??", target_out.c_str());
+  }
+  
   if (!option || !strcmp(option, "file")) {
 
     string extension = "";
