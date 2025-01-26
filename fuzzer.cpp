@@ -999,6 +999,20 @@ void Fuzzer::ReplaceTargetCmdArg(ThreadContext *tc, const char *search, const ch
   }
 }
 
+void Fuzzer::ReplaceClientCmdArg(char* client_cmd, const char* old_str, const char* new_str) {
+    static char buffer[4096];
+    char *p = client_cmd;
+    size_t orig_len = strlen(old_str);
+    size_t rep_len = strlen(new_str);
+    while ((p = strstr(p, old_str))) {
+        strncpy(buffer, client_cmd, p - client_cmd);
+        buffer[p - client_cmd] = '\0';
+        sprintf(buffer + (p - client_cmd), "%s%s", new_str, p + orig_len);
+        strcpy(client_cmd, buffer);
+        p = client_cmd + (p - client_cmd) + rep_len;
+    }
+}
+
 PRNG *Fuzzer::CreatePRNG(int argc, char **argv, ThreadContext *tc) {
   return new MTPRNG();
 }
@@ -1024,6 +1038,7 @@ Instrumentation *Fuzzer::CreateInstrumentation(int argc, char **argv, ThreadCont
 SampleDelivery *Fuzzer::CreateSampleDelivery(int argc, char **argv, ThreadContext *tc) {
   char *option = GetOption("-delivery", argc, argv);
   char *out_extension = GetOption("-out_extension", argc, argv);
+  char *client_cmd = GetOption("-client_cmd", argc, argv);
 
   if(out_extension){
     string out_dir = DirJoin(delivery_dir, "out");
@@ -1067,9 +1082,8 @@ SampleDelivery *Fuzzer::CreateSampleDelivery(int argc, char **argv, ThreadContex
     }
 
     string outfile = DirJoin(delivery_dir, string("input_") + std::to_string(tc->thread_id) + extension);
-    ReplaceTargetCmdArg(tc, "@@", outfile.c_str());
-
-    ExternalSampleDelivery* sampleDelivery = new ExternalSampleDelivery(ArgvToCmd(tc->target_argc, tc->target_argv));
+    ReplaceClientCmdArg(client_cmd, "@@", outfile.c_str());
+    ExternalSampleDelivery* sampleDelivery = new ExternalSampleDelivery(client_cmd);
     sampleDelivery->SetFilename(outfile);
     return sampleDelivery;
   } else{

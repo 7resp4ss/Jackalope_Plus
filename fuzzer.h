@@ -174,7 +174,8 @@ protected:
   virtual bool TrackHotOffsets() { return false; }
 
   void ReplaceTargetCmdArg(ThreadContext *tc, const char *search, const char *replace);
-  
+  void ReplaceClientCmdArg(char* client_cmd, const char* old_str, const char* new_str);
+
   bool MagicOutputFilter(Sample *original_sample, Sample *output_sample, const char *magic, size_t magic_size);
 
   void SaveSample(ThreadContext *tc, Sample *sample, uint32_t init_timeout, uint32_t timeout, Sample *original_sample);
