@@ -82,6 +82,7 @@ public:
     
     bool coverage_initialized;
     bool attach_mode;
+    char *client_cmd;
 
     ~ThreadContext();
   };
@@ -174,7 +175,8 @@ protected:
   virtual bool TrackHotOffsets() { return false; }
 
   void ReplaceTargetCmdArg(ThreadContext *tc, const char *search, const char *replace);
-  
+  void ReplaceClientCmdArg(ThreadContext *tc, const char *search, const char *replace);
+
   bool MagicOutputFilter(Sample *original_sample, Sample *output_sample, const char *magic, size_t magic_size);
 
   void SaveSample(ThreadContext *tc, Sample *sample, uint32_t init_timeout, uint32_t timeout, Sample *original_sample);

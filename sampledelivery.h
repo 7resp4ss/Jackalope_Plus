@@ -61,7 +61,7 @@ protected:
 
 class ExternalSampleDelivery : public SampleDelivery {
 public:
-  ExternalSampleDelivery(char *cmd);
+  ExternalSampleDelivery(std::string cmd);
   ~ExternalSampleDelivery();
 
   int DeliverSample(Sample *sample);
@@ -69,11 +69,16 @@ public:
   void SetFilename(std::string filename) {
     this->filename = filename;
   }
+  static void* ExecuteSystemCommand(void *arg) {
+    const char* cmd = static_cast<const char*>(arg);
+    system(cmd);
+    return nullptr;
+}
   
 protected:
 
   std::string filename;
-  char *cmd;
+  std::string cmd;
 };
 
 
