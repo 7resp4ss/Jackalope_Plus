@@ -330,11 +330,11 @@ RunResult SanCovInstrumentation::Run(int argc, char **argv, uint32_t init_timeou
 }
 
 RunResult SanCovInstrumentation::Attach(unsigned int pid, uint32_t init_timeout, uint32_t timeout) {
-  return;
+  ;
 }
 
 RunResult SanCovInstrumentation::AttachWithCrashAnalysis(unsigned int pid, uint32_t init_timeout, uint32_t timeout) {
-  return;
+  ;
 }
 
 void SanCovInstrumentation::CleanTarget() {
