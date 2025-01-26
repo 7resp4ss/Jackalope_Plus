@@ -16,6 +16,7 @@ limitations under the License.
 
 #include "common.h"
 #include "sampledelivery.h"
+#include "thread.h"
 
 int FileSampleDelivery::DeliverSample(Sample *sample) {
   return sample->Save(filename.c_str());
@@ -38,7 +39,7 @@ int SHMSampleDelivery::DeliverSample(Sample *sample) {
   return 1;
 }
 
-ExternalSampleDelivery::ExternalSampleDelivery(char *cmd) {
+ExternalSampleDelivery::ExternalSampleDelivery(std::string cmd) {
     this->cmd = cmd;
 }
 
@@ -48,7 +49,6 @@ ExternalSampleDelivery::~ExternalSampleDelivery() {
 
 int ExternalSampleDelivery::DeliverSample(Sample *sample) {
   sample->Save(filename.c_str());
-  HANDLE thread_handle = CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)system, cmd, 0, NULL);
-  CloseHandle(thread_handle);
+  CreateThread(ExternalSampleDelivery::ExecuteSystemCommand, (void *)cmd.c_str());
   return 1;
 }

@@ -31,6 +31,8 @@ public:
   void Init(int argc, char **argv) override;
 
   RunResult Run(int argc, char** argv, uint32_t init_timeout, uint32_t timeout) override;
+  RunResult Attach(unsigned int pid,  uint32_t init_timeout, uint32_t timeout) override;
+  RunResult AttachWithCrashAnalysis(unsigned int pid, uint32_t init_timeout, uint32_t timeout) override;
 
   void CleanTarget() override;
 

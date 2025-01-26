@@ -182,7 +182,7 @@ void TestGrammar(char* grammar_path) {
   } else {
     std::string out;
     grammar.ToString(tree, out);
-    printf("Generated sample:\n%s\n", out.c_str());
+    printf("%s\n", out.c_str());
   }
 }
 
