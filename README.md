@@ -138,6 +138,8 @@ The following command line arguments are supported:
 
 `-pid`  –  Specifies the `PID` of the target process you want to fuzz.
 
+`-client_cmd`  –  Example：`-client_cmd "..\examples\Attach_mode\Release\test_client.exe @@" `
+
 For TinyInst instrumentation command line arguments, refer to [TinyInst readme](https://github.com/googleprojectzero/TinyInst).
 
 Example (macOS):
