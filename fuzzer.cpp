@@ -972,7 +972,7 @@ Fuzzer::ThreadContext *Fuzzer::CreateThreadContext(int argc, char **argv, int th
   tc->range_tracker = CreateRangeTracker(argc, argv, tc);
   tc->coverage_initialized = false;
   tc->attach_mode = attach_mode;
-  
+  tc->client_cmd = NULL;
   return tc;
 }
 
@@ -999,17 +999,21 @@ void Fuzzer::ReplaceTargetCmdArg(ThreadContext *tc, const char *search, const ch
   }
 }
 
-void Fuzzer::ReplaceClientCmdArg(char* client_cmd, const char* old_str, const char* new_str) {
-    static char buffer[4096];
-    char *p = client_cmd;
-    size_t orig_len = strlen(old_str);
-    size_t rep_len = strlen(new_str);
-    while ((p = strstr(p, old_str))) {
-        strncpy(buffer, client_cmd, p - client_cmd);
-        buffer[p - client_cmd] = '\0';
-        sprintf(buffer + (p - client_cmd), "%s%s", new_str, p + orig_len);
-        strcpy(client_cmd, buffer);
-        p = client_cmd + (p - client_cmd) + rep_len;
+void Fuzzer::ReplaceClientCmdArg(ThreadContext *tc, const char *search, const char *replace) {
+    char *client_cmd = tc->client_cmd;
+    size_t orig_len = strlen(client_cmd);
+    size_t search_len = strlen(search);
+    size_t rep_len = strlen(replace);
+
+    char *buffer = (char *)malloc(orig_len - search_len + rep_len + 1);
+    char *p = NULL;
+    while ((p = strstr(client_cmd, search))) {
+        size_t prefix_len = p - client_cmd;
+        strncpy(buffer, client_cmd, prefix_len);
+        buffer[prefix_len] = '\0';
+        sprintf(buffer + prefix_len, "%s%s", replace, p + search_len);
+        tc->client_cmd = buffer;
+        client_cmd = tc->client_cmd;
     }
 }
 
@@ -1075,6 +1079,7 @@ SampleDelivery *Fuzzer::CreateSampleDelivery(int argc, char **argv, ThreadContex
     sampleDelivery->Init(argc, argv);
     return sampleDelivery;
   } else if(!strcmp(option, "external")) {
+    tc->client_cmd = client_cmd;
     string extension = "";
     char *extension_opt = GetOption("-file_extension", argc, argv);
     if(extension_opt) {
@@ -1082,8 +1087,11 @@ SampleDelivery *Fuzzer::CreateSampleDelivery(int argc, char **argv, ThreadContex
     }
 
     string outfile = DirJoin(delivery_dir, string("input_") + std::to_string(tc->thread_id) + extension);
-    ReplaceClientCmdArg(client_cmd, "@@", outfile.c_str());
-    ExternalSampleDelivery* sampleDelivery = new ExternalSampleDelivery(client_cmd);
+    printf("Create Thread Target_argv: %s\n",tc->target_argv[0]);
+
+    ReplaceClientCmdArg(tc, "@@", outfile.c_str());
+    ReplaceTargetCmdArg(tc, "@@", outfile.c_str());
+    ExternalSampleDelivery* sampleDelivery = new ExternalSampleDelivery(tc->client_cmd);
     sampleDelivery->SetFilename(outfile);
     return sampleDelivery;
   } else{
