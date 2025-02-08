@@ -266,6 +266,7 @@ protected:
   std::unordered_map<std::string, int> unique_crashes;
   
   uint64_t last_save_time;
+  uint64_t last_find_new_offset_time;
   
   SampleTrie sample_trie;
 };

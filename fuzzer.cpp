@@ -200,6 +200,7 @@ void Fuzzer::Run(int argc, char **argv) {
   }
   
   last_save_time = GetCurTime();
+  last_find_new_offset_time = 0;
   // if(attach_mode){
   //   ThreadContext *tc = CreateThreadContext(argc, argv, 0xdead, !attach_mode);  //client id is 0xdead
   //   CreateThread(StartFuzzThread, tc);
@@ -228,7 +229,7 @@ void Fuzzer::Run(int argc, char **argv) {
     }
     coverage_mutex.Unlock();
     
-    printf("\nTotal execs: %lld\nUnique samples: %lld (%lld discarded)\nCrashes: %lld (%lld unique)\nHangs: %lld\nOffsets: %zu\nExecs/s: %lld\n", total_execs, num_samples, num_samples_discarded, num_crashes, num_unique_crashes, num_hangs, num_offsets, (total_execs - last_execs) / secs_to_sleep);
+    printf("\nTotal execs: %lld\nUnique samples: %lld (%lld discarded)\nCrashes: %lld (%lld unique)\nHangs: %lld\nOffsets: %zu(%zu seconds ago)\nExecs/s: %lld\n", total_execs, num_samples, num_samples_discarded, num_crashes, num_unique_crashes, num_hangs, num_offsets, last_find_new_offset_time, (total_execs - last_execs) / secs_to_sleep);
     last_execs = total_execs;
     
     if (state == FUZZING && dry_run) {
@@ -484,6 +485,7 @@ RunResult Fuzzer::RunSample(ThreadContext *tc, Sample *sample, int *has_new_cove
   if (InterestingSample(tc, sample, &stableCoverage, &variableCoverage)) {
     if (has_new_coverage) {
       *has_new_coverage = 1;
+      last_new_offset_time = 0;
     }
 
     if (trim && minimize_samples) MinimizeSample(tc, sample, &stableCoverage, init_timeout, timeout);
