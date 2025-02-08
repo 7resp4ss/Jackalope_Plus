@@ -485,7 +485,7 @@ RunResult Fuzzer::RunSample(ThreadContext *tc, Sample *sample, int *has_new_cove
   if (InterestingSample(tc, sample, &stableCoverage, &variableCoverage)) {
     if (has_new_coverage) {
       *has_new_coverage = 1;
-      last_new_offset_time = 0;
+      last_find_new_offset_time = 0;
     }
 
     if (trim && minimize_samples) MinimizeSample(tc, sample, &stableCoverage, init_timeout, timeout);
