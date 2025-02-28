@@ -135,14 +135,151 @@ void FUZZ_TARGET_MODIFIERS fuzz(char *name) {
     fclose(fp);
   }
   
-  if(sample_size >= 4) {
-    // check if the sample spells "test"
-    if(*(uint32_t *)(sample_bytes) == 0x74736574) {
-      // if so, crash
-      crash[0] = 1;
-    }
+  int tmp = 0;
+
+  if (sample_size < 4) {
+      if (sample_size == 2) {
+          tmp += 12;  // 表示 "Size is exactly 2 bytes"
+      } else if (sample_size == 3) {
+          tmp += 13;  // 表示 "Size is exactly 3 bytes"
+      } else if (sample_size == 1) {
+          tmp += 14;  // 表示 "Size is exactly 1 byte"
+      } else {
+          tmp += 15;  // 表示 "Size < 4 and not 1, 2, or 3"
+      }
+  } else {
+      // sample_size >= 4
+      if (sample_bytes[0] == 'a') {
+          if (sample_bytes[1] == 'b') {
+              if (sample_bytes[2] == 'c') {
+                  if (sample_bytes[3] == 'd') {
+                      // 匹配 "abcd"
+                      if (sample_size >= 8) {
+                          if (sample_bytes[4] == 'e') {
+                              if (sample_bytes[5] == 'f') {
+                                  if (sample_bytes[6] == 'g') {
+                                      if (sample_bytes[7] == 'h') {
+                                          // 匹配 "efgh"
+                                          if (sample_size >= 12) {
+                                              if (sample_bytes[8] == 'i') {
+                                                  if (sample_bytes[9] == 'j') {
+                                                      if (sample_bytes[10] == 'k') {
+                                                          if (sample_bytes[11] == 'l') {
+                                                              // 匹配 "ijkl"
+                                                              if (sample_size >= 16) {
+                                                                  if (sample_bytes[12] == 'm') {
+                                                                      if (sample_bytes[13] == 'n') {
+                                                                          if (sample_bytes[14] == 'o') {
+                                                                              if (sample_bytes[15] == 'p') {
+                                                                                  // 匹配 "mnop"
+                                                                                  crash[0] = 1;
+                                                                              } else {
+                                                                                  tmp += 1;  // 表示 "Matches 'abcd efgh ijkl' but not 'mnop'"
+                                                                              }
+                                                                          } else {
+                                                                              tmp += 1;
+                                                                          }
+                                                                      } else {
+                                                                          tmp += 1;
+                                                                      }
+                                                                  } else {
+                                                                      tmp += 1;
+                                                                  }
+                                                              } else {
+                                                                  tmp += 2;  // 表示 "Matches 'abcd efgh ijkl' but < 16 bytes"
+                                                              }
+                                                          } else {
+                                                              tmp += 3;  // 表示 "Matches 'abcd efgh' but not 'ijkl'"
+                                                          }
+                                                      } else {
+                                                          tmp += 3;
+                                                      }
+                                                  } else {
+                                                      tmp += 3;
+                                                  }
+                                              } else {
+                                                  tmp += 3;
+                                              }
+                                          } else {
+                                              tmp += 4;  // 表示 "Matches 'abcd efgh' but < 12 bytes"
+                                          }
+                                      } else {
+                                          tmp += 5;  // 表示 "Starts with 'abcd' but next four != 'efgh'"
+                                      }
+                                  } else {
+                                      tmp += 5;
+                                  }
+                              } else {
+                                  tmp += 5;
+                              }
+                          } else {
+                              tmp += 5;
+                          }
+                      } else {
+                          tmp += 6;  // 表示 "Starts with 'abcd' but < 8 bytes"
+                      }
+                  } else {
+                      tmp += 11;  // 表示 "Does not start with 'abcd', '1234', 'ABCD', or 'xyzw'"
+                  }
+              } else {
+                  tmp += 11;
+              }
+          } else {
+              tmp += 11;
+          }
+      } else if (sample_bytes[0] == '1') {
+          if (sample_bytes[1] == '2') {
+              if (sample_bytes[2] == '3') {
+                  if (sample_bytes[3] == '4') {
+                      // 匹配 "1234"
+                      if (sample_size >= 6) {
+                          tmp += 7;  // 表示 "Starts with '1234' and >= 6 bytes"
+                      } else {
+                          tmp += 8;  // 表示 "Starts with '1234' but < 6 bytes"
+                      }
+                  } else {
+                      tmp += 11;
+                  }
+              } else {
+                  tmp += 11;
+              }
+          } else {
+              tmp += 11;
+          }
+      } else if (sample_bytes[0] == 'A') {
+          if (sample_bytes[1] == 'B') {
+              if (sample_bytes[2] == 'C') {
+                  if (sample_bytes[3] == 'D') {
+                      // 匹配 "ABCD"
+                      tmp += 9;  // 表示 "Starts with 'ABCD'"
+                  } else {
+                      tmp += 11;
+                  }
+              } else {
+                  tmp += 11;
+              }
+          } else {
+              tmp += 11;
+          }
+      } else if (sample_bytes[0] == 'x') {
+          if (sample_bytes[1] == 'y') {
+              if (sample_bytes[2] == 'z') {
+                  if (sample_bytes[3] == 'w') {
+                      // 匹配 "xyzw"
+                      tmp += 10;  // 表示 "Starts with 'xyzw'"
+                  } else {
+                      tmp += 11;
+                  }
+              } else {
+                  tmp += 11;
+              }
+          } else {
+              tmp += 11;
+          }
+      } else {
+          tmp += 11;  // 表示 "Does not start with 'abcd', '1234', 'ABCD', or 'xyzw'"
+      }
   }
-  
   if(sample_bytes) free(sample_bytes);
 }
 

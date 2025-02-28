@@ -114,6 +114,12 @@ add_executable(fuzzer
 
 target_link_libraries(fuzzer fuzzerlib)
 
+add_executable(Jmin
+  Jacklope_tmin.cpp
+)
+
+target_link_libraries(Jmin fuzzerlib)
+
 add_executable(test
   test.cpp
   )
