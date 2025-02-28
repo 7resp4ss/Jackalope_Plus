@@ -148,6 +148,10 @@ Example (macOS):
 ./fuzzer -in in -out out -t 1000 -delivery shmem -instrument_module test -target_module test -target_method __Z4fuzzPc -nargs 1 -iterations 10000 -persist -loop -cmp_coverage -- ./test -m @@
 ```
 
+```
+./Jmin -mini_in test_sample -mini_out out_sample -mini_t 2333333 -delivery file -instrument_module test -target_module test -target_method __Z4fuzzPc -nargs 1 -iterations 10000 -persist -loop -cmp_coverage  -- ./test -f  test_sample
+```
+
 Example (Windows):
 
 ```

@@ -1,5 +1,6 @@
 #pragma once
 #include <stdio.h>
+#include <unistd.h>
 #define TMIN_SET_MIN_SIZE   4
 #define TMIN_SET_STEPS      128
 #define TMIN_MAX_FILE       (100 * 1024 * 1024)

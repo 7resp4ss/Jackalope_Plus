@@ -466,15 +466,16 @@ void Jminimizer::BinaryMinimize(JMinimizerContext *mc) {
     "     File size reduced by : %0.02f%% (to %u byte%s)\n"
     "    Characters simplified : %0.02f%%\n"
     "     Number of execs done : %u\n"
-    "             Elapsed time : %.3f secs\n\n",
+    "             Elapsed time : %.3f secs\n\n"
     "        Crashes and Hangs : %u and %u\n\n",
     in_file.c_str(), 
     100 - ((double)in_len) * 100 / orig_len, 
     in_len, 
     in_len == 1 ? "" : "s", 
     ((double)(alpha_d_total)) * 100 / (in_len ? in_len : 1),
-    (GetCurTime() - start_time) / 1000.0),
-    crash_times, hang_times;
+    (GetCurTime() - start_time) / 1000.0,
+    crash_times, hang_times
+  );
 }
 
 void Jminimizer::GrammarMinimize(JMinimizerContext *mc, std::string grammar_file) {
